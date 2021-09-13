@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+/*import { Request, Response } from 'express';
 
 import db from '../database/connection';
 import convertHourToMinutes from '../Utils/convertHourToMinutes';
@@ -32,6 +32,7 @@ export default class ClassesController {
                     .whereRaw('`class_schedule`.`to` > ??', [timeInMinutes])
             })
             .where('classes.subject', '=', subject)
+            .where('classes.format', '=', format)
             .join('users', 'classes.user_id', '=', 'users.id')
             .select(['classes.*', 'users.*']);
 
@@ -79,9 +80,9 @@ export default class ClassesController {
                 };
             })
         
-            await trx('class_schedule').insert(classSchedule);
+            await trx('class_schedule').insert(classSchedule); // espera insercecao 
         
-            await trx.commit();
+            await trx.commit();// deu certo a transections
         
         
             return respose.status(201).send();
@@ -94,3 +95,4 @@ export default class ClassesController {
     }
 
 }
+*/
