@@ -4,11 +4,11 @@ import knex from 'knex';
 const db = knex({
     client: 'pg',
     connection: {
-        host : 'localhost',
+        host : '189.84.9.61',
         port: 5432,
-        database: 'saveme',
+        database: 'postgres',
         user: 'postgres',
-        password: 'postgres'
+        password: '250497196'
       },
     useNullAsDefault: true,
 });

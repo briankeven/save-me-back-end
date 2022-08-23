@@ -1,21 +1,30 @@
 import { Request, Response, NextFunction } from 'express';
-import {v4 as uuid} from 'uuid';
 
 import db from '../database/connection';
+
+
 
 class UsersControlller {
     
     async index (request: Request, response: Response, next: NextFunction) {
-        const {user_id} = request.query;
-
+        const {email} = request.params;
+        
         try {
 
             const users = await db('users')
-                .where('users.id', String(user_id))
+                .where('users.email', '=',String(email))
                 .select(
-                    'users.*'
-                );
-
+                    'users.id as user_id',
+                    'name',
+                    'email',
+                    'photo',
+                    'like',
+                    'country',
+                    'city',
+                    'whats'
+                )
+                .first();
+            
             return response.json(users);
 
         } catch (error) {
@@ -23,10 +32,9 @@ class UsersControlller {
         }
     }
     
-    async create(request: Request, response: Response, next: NextFunction){
-        const {name, email, image} = request.body;
-        const photo = image;
-       
+    async create(request: Request, response:Response, next:NextFunction){
+        const {id, name, email, image} = request.body;
+        
         try{
 
             const eml = await db('users')
@@ -34,12 +42,11 @@ class UsersControlller {
                 .first();
             
             if(eml)
-                return response.status(400).send({ error: 'Este e-mail já cadastrado'});
+                return response.status(201).send({ error: 'Este e-mail já cadastrado'});
 
-            const id = uuid();
-
+           
             await db('users')
-                .insert({id, name, email, photo})
+                .insert({id, name, email, photo:image})
 
             return response.status(201).send();
         }catch(error){
@@ -48,16 +55,42 @@ class UsersControlller {
     }
 
     async update(request: Request, response: Response, next: NextFunction){
-        const {id, name, email, image, city, country, whats} = request.body;
-        const photo = image;
-
+        const {name, email, image, city, country, whats} = request.body;
 
         try{ 
             
             await db('users')
-                .where({id})
-                .update({name, email, photo, city, country, whats});
+                .where({email})
+                .update({name, email, photo:image, city, country, whats});
             
+            
+            return response.status(201).send();
+        }catch(error){
+            next(error);
+        }
+    }
+
+    async like(request: Request, response: Response, next: NextFunction){
+        const {id, duvida_id} = request.body;
+        
+
+        try{
+            const numero = await db('users')
+                .where({id})
+                .select('like')
+            
+            const like = numero[0].like + 1;
+
+            await db('users')
+                .where({id})
+                .update({like})
+            
+            await db('contatos').where({duvida_id}).delete()
+
+            await db('duvidas')
+                .where({id:duvida_id})
+                .delete();
+        
             return response.status(201).send();
         }catch(error){
             next(error);
